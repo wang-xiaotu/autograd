@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 import matplotlib.pyplot as plt
 import csv
+import sys
 import autograd.numpy as np
 import autograd.numpy.random as npr
 from black_box_svi import black_box_variational_inference
@@ -17,8 +18,9 @@ def make_nn_funs(layer_sizes, L2_reg, noise_variance, nonlinearity=np.tanh):
     def unpack_layers(weights):
         num_weight_sets = len(weights)
         for m, n in shapes:
+            # weights
             yield weights[:, :m * n].reshape((num_weight_sets, m, n)), \
-                  weights[:, m * n:m * n + n].reshape((num_weight_sets, 1, n))
+                  weights[:, m * n:m * n + n].reshape((num_weight_sets, 1, n)) # constant unit
             weights = weights[:, (m + 1) * n:]
 
     def predictions(weights, inputs):
@@ -64,17 +66,27 @@ def make_nn_funs(layer_sizes, L2_reg, noise_variance, nonlinearity=np.tanh):
     #
     # return inputs, targets, overallinput, overalltarget, input_ix
 
-def build_toy_dataset(n_data=40, noise_std=0.1, seed=0):
+def build_toy_dataset(n_data=40, noise_std=0.1, type = "1", seed=0):
     D = 1
     rs = npr.RandomState(seed)
     total_num = n_data * 10
     overallinput = np.linspace(-8, 8, num=total_num)
     overalltarget = 0.7 * np.cos(overallinput) + 0.25*overallinput + rs.randn(n_data * 10) * noise_std
     overallinput = overallinput / 4
-    input_ix = random.sample(range(total_num), 200)
-    # input_ix1 = np.logical_and(overallinput < 1.2, overallinput > 0.4)
-    # input_ix2 = np.logical_and(overallinput <= 0.4, overallinput > -1)
-    # input_ix = np.logical_or(input_ix1, input_ix2)
+    if type == "1":
+        #print("more")
+        input_ix = random.sample(range(total_num), 200)
+    elif type == "0":
+        #print("less")
+        #input_ix = np.concatenate([random.sample()])
+        input_ix1 = np.array(range(total_num))[overallinput<=1]
+        input_ix11 = random.sample(input_ix1.tolist(), 190)
+        input_ix2 = np.array(range(total_num))[overallinput>1]
+        input_ix22 = random.sample(input_ix2.tolist(), 10)
+
+        #input_ix1 = np.logical_and(overallinput <=1, overallinput > 0.4)
+        #input_ix2 = np.logical_and(overallinput <= 0.4, overallinput > -1)
+        input_ix = np.concatenate([input_ix11, input_ix22])
 
     inputs = overallinput[input_ix]
     targets = overalltarget[input_ix]
@@ -85,10 +97,13 @@ def build_toy_dataset(n_data=40, noise_std=0.1, seed=0):
 
     return inputs, targets, overallinput, overalltarget, input_ix
 
-
 if __name__ == '__main__':
-    B = 100
-    inputs, targets, tot_inputs, tot_targets, input_idx = build_toy_dataset()
+    input_args = sys.argv
+    print(sys.argv)
+    B = int(sys.argv[1])
+    t = sys.argv[2]
+    tau = float(sys.argv[3])
+    inputs, targets, tot_inputs, tot_targets, input_idx = build_toy_dataset(n_data=40, noise_std=tau, type = t)
     coverage_df = np.zeros(400).reshape(400, 1)
     coverage_df[input_idx, :] = 1 # indicate the training data index
     for b in range(B):
@@ -98,7 +113,7 @@ if __name__ == '__main__':
             make_nn_funs(layer_sizes=[1, 20, 20, 1], L2_reg=0.1,
                          noise_variance=0.01, nonlinearity=rbf)
 
-        inputs, targets, tot_inputs, tot_targets, input_idx = build_toy_dataset(seed=b)
+        inputs, targets, tot_inputs, tot_targets, input_idx = build_toy_dataset(n_data=40, noise_std=tau, type = t)
         log_posterior = lambda weights, t: logprob(weights, inputs, targets)
 
         # Build variational objective.
@@ -143,7 +158,7 @@ if __name__ == '__main__':
 
         print("Optimizing variational parameters...")
         variational_params = adam(gradient, init_var_params,
-                                  step_size=0.1, num_iters=1000, callback=callback)
+                                  step_size=0.1, num_iters=500, callback=callback)
         print(variational_params)
 
         # Sample functions from the final posterior.
@@ -168,9 +183,11 @@ if __name__ == '__main__':
         ax.plot(tot_inputs.ravel(), lowerbd.ravel(), "k-", label="error bar")
         ax.plot(tot_inputs.ravel(), upperbd.ravel(), "k-")
         ax.legend()
-        ax.set_ylim([-2, 3])
+        ax.set_ylim([tot_targets.min()-0.1,tot_targets.max()+0.1])
         plt.show()
 
-    np.savetxt("diagVar_QuantUQ_0511.csv", coverage_df, delimiter=',', fmt='%d')
+    filename = "diagVar" + "B" + str(B) + "t"+str(t) + "noise"+str(tau) + ".csv"
+
+    np.savetxt(filename, coverage_df, delimiter=',', fmt='%d')
 
     # csv.reader("diagVar_QuantUQ.csv")
