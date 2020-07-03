@@ -165,40 +165,40 @@ if __name__ == '__main__':
         print("Optimizing variational parameters...")
         variational_params = adam(gradient, init_var_params,
                                   step_size=0.1, num_iters=200, callback=callback)
-        print(variational_params)
-
-        # Sample functions from the final posterior.
-        # rs = npr.RandomState(0)
-        mean, log_std, rho = unpack_params(variational_params)
-        # mean, log_std = unpack_params(variational_params)
-        # mean = unpack_params(variational_params)
-
-        # rs = npr.RandomState(0)
-
-        covariance = get_covariance(variational_params)
-        cov_decomp = np.linalg.cholesky(covariance)
-
-        sample_weights = np.matmul(rs.randn(1000, len(log_std)), cov_decomp) + mean
-
-        plot_inputs = np.linspace(-2, 2, num=400)
-        outputs_final = predictions(sample_weights, np.expand_dims(plot_inputs, 1))
-        lowerbd = np.quantile(outputs_final, 0.05, axis=0)
-        upperbd = np.quantile(outputs_final, 0.95, axis=0)
-        inconint = np.logical_and(lowerbd < tot_targets, upperbd > tot_targets).ravel()
-        con_ind = np.zeros(len(lowerbd))
-        con_ind[inconint] = 1
-        con_ind = con_ind.reshape(len(con_ind), 1)
-        coverage_df = np.concatenate([coverage_df, con_ind], axis=1)
-        # Plot data and functions.
-        fig = plt.figure(figsize=(12, 8), facecolor='white')
-        ax = fig.add_subplot(111, frameon=False)
-        ax.plot(tot_inputs.ravel(), tot_targets.ravel(), "bx", label = "testing data")
-        ax.plot(inputs.ravel(), targets.ravel(), 'rx', label = "training data")
-        ax.plot(tot_inputs.ravel(), lowerbd.ravel(), "k-")
-        ax.plot(tot_inputs.ravel(), upperbd.ravel(), "k-")
-        ax.set_ylim([-2, 3])
-        ax.legend()
-        plt.show()
+        # print(variational_params)
+        #
+        # # Sample functions from the final posterior.
+        # # rs = npr.RandomState(0)
+        # mean, log_std, rho = unpack_params(variational_params)
+        # # mean, log_std = unpack_params(variational_params)
+        # # mean = unpack_params(variational_params)
+        #
+        # # rs = npr.RandomState(0)
+        #
+        # covariance = get_covariance(variational_params)
+        # cov_decomp = np.linalg.cholesky(covariance)
+        #
+        # sample_weights = np.matmul(rs.randn(1000, len(log_std)), cov_decomp) + mean
+        #
+        # plot_inputs = np.linspace(-2, 2, num=400)
+        # outputs_final = predictions(sample_weights, np.expand_dims(plot_inputs, 1))
+        # lowerbd = np.quantile(outputs_final, 0.05, axis=0)
+        # upperbd = np.quantile(outputs_final, 0.95, axis=0)
+        # inconint = np.logical_and(lowerbd < tot_targets, upperbd > tot_targets).ravel()
+        # con_ind = np.zeros(len(lowerbd))
+        # con_ind[inconint] = 1
+        # con_ind = con_ind.reshape(len(con_ind), 1)
+        # coverage_df = np.concatenate([coverage_df, con_ind], axis=1)
+        # # Plot data and functions.
+        # fig = plt.figure(figsize=(12, 8), facecolor='white')
+        # ax = fig.add_subplot(111, frameon=False)
+        # ax.plot(tot_inputs.ravel(), tot_targets.ravel(), "bx", label = "testing data")
+        # ax.plot(inputs.ravel(), targets.ravel(), 'rx', label = "training data")
+        # ax.plot(tot_inputs.ravel(), lowerbd.ravel(), "k-")
+        # ax.plot(tot_inputs.ravel(), upperbd.ravel(), "k-")
+        # ax.set_ylim([-2, 3])
+        # ax.legend()
+        # plt.show()
     filename = "blockVar" + "B" + str(B) + "t"+str(t) + "noise"+str(tau) + ".csv"
     np.savetxt(filename, coverage_df, delimiter=',', fmt='%d')
 
