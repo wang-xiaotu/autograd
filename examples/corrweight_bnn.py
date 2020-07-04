@@ -5,6 +5,7 @@ import random
 import autograd.numpy as np
 import autograd.numpy.random as npr
 import sys
+import numpy
 from corrweight_vi import black_box_variational_inference_corsigma
 from autograd.misc.optimizers import adam
 
@@ -141,32 +142,32 @@ if __name__ == '__main__':
 
         print("Optimizing variational parameters...")
         variational_params = adam(gradient, init_var_params,
-                                  step_size=0.1, num_iters=500, callback=callback)
+                                  step_size=0.1, num_iters=10, callback=callback)
         # print(variational_params)
         #
-        # # Sample functions from the final posterior.
+        # Sample functions from the final posterior.
+        rs = npr.RandomState(0)
+        mean, log_std, rho = unpack_params(variational_params)
         # rs = npr.RandomState(0)
-        # mean, log_std, rho = unpack_params(variational_params)
-        # # rs = npr.RandomState(0)
-        #
-        # sigma = np.exp(log_std).reshape(len(log_std), 1)
-        # variance_matrix = np.matmul(sigma, sigma.T) * rho
-        # covariance = np.diag(np.exp(2 * log_std)) * (1 - rho) + variance_matrix + np.diag(1e-10 * np.ones(len(mean)))
-        # print(type(covariance))
+
+        sigma = np.exp(log_std).reshape(len(log_std), 1)
+        variance_matrix = np.matmul(sigma, sigma.T) * rho
+        covariance = np.diag(np.exp(2 * log_std)) * (1 - rho) + variance_matrix + np.diag(1e-10 * np.ones(len(mean)))
+        print(type(covariance))
+        cov_decomp = np.linalg.cholesky(covariance)
         # cov_decomp = np.linalg.cholesky(covariance)
-        # # cov_decomp = np.linalg.cholesky(covariance)
-        #
-        # sample_weights = np.matmul(rs.randn(1000, len(log_std)), cov_decomp) + mean
-        #
-        # plot_inputs = np.linspace(-2, 2, num=400)
-        # outputs_final = predictions(sample_weights, np.expand_dims(plot_inputs, 1))
-        # lowerbd = np.quantile(outputs_final, 0.05, axis=0)
-        # upperbd = np.quantile(outputs_final, 0.95, axis=0)
-        # inconint = np.logical_and(lowerbd < tot_targets, upperbd > tot_targets).ravel()
-        # con_ind = np.zeros(len(lowerbd))
-        # con_ind[inconint] = 1
-        # con_ind = con_ind.reshape(len(con_ind), 1)
-        # coverage_df = np.concatenate([coverage_df, con_ind], axis=1)
+
+        sample_weights = np.matmul(rs.randn(1000, len(log_std)), cov_decomp) + mean
+
+        plot_inputs = np.linspace(-2, 2, num=400)
+        outputs_final = predictions(sample_weights, np.expand_dims(plot_inputs, 1))
+        lowerbd = numpy.quantile(outputs_final, 0.05, axis=0)
+        upperbd = numpy.quantile(outputs_final, 0.95, axis=0)
+        inconint = np.logical_and(lowerbd < tot_targets, upperbd > tot_targets).ravel()
+        con_ind = np.zeros(len(lowerbd))
+        con_ind[inconint] = 1
+        con_ind = con_ind.reshape(len(con_ind), 1)
+        coverage_df = np.concatenate([coverage_df, con_ind], axis=1)
         # # Plot data and functions.
         # fig = plt.figure(figsize=(12, 8), facecolor='white')
         # ax = fig.add_subplot(111, frameon=False)

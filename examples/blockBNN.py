@@ -3,6 +3,7 @@ from __future__ import print_function
 import matplotlib.pyplot as plt
 import random
 import sys
+import numpy
 import autograd.numpy as np
 import autograd.numpy.random as npr
 
@@ -167,28 +168,28 @@ if __name__ == '__main__':
                                   step_size=0.1, num_iters=200, callback=callback)
         # print(variational_params)
         #
-        # # Sample functions from the final posterior.
-        # # rs = npr.RandomState(0)
-        # mean, log_std, rho = unpack_params(variational_params)
-        # # mean, log_std = unpack_params(variational_params)
-        # # mean = unpack_params(variational_params)
-        #
-        # # rs = npr.RandomState(0)
-        #
-        # covariance = get_covariance(variational_params)
-        # cov_decomp = np.linalg.cholesky(covariance)
-        #
-        # sample_weights = np.matmul(rs.randn(1000, len(log_std)), cov_decomp) + mean
-        #
-        # plot_inputs = np.linspace(-2, 2, num=400)
-        # outputs_final = predictions(sample_weights, np.expand_dims(plot_inputs, 1))
-        # lowerbd = np.quantile(outputs_final, 0.05, axis=0)
-        # upperbd = np.quantile(outputs_final, 0.95, axis=0)
-        # inconint = np.logical_and(lowerbd < tot_targets, upperbd > tot_targets).ravel()
-        # con_ind = np.zeros(len(lowerbd))
-        # con_ind[inconint] = 1
-        # con_ind = con_ind.reshape(len(con_ind), 1)
-        # coverage_df = np.concatenate([coverage_df, con_ind], axis=1)
+        # Sample functions from the final posterior.
+        # rs = npr.RandomState(0)
+        mean, log_std, rho = unpack_params(variational_params)
+        # mean, log_std = unpack_params(variational_params)
+        # mean = unpack_params(variational_params)
+
+        # rs = npr.RandomState(0)
+
+        covariance = get_covariance(variational_params)
+        cov_decomp = np.linalg.cholesky(covariance)
+
+        sample_weights = np.matmul(rs.randn(1000, len(log_std)), cov_decomp) + mean
+
+        plot_inputs = np.linspace(-2, 2, num=400)
+        outputs_final = predictions(sample_weights, np.expand_dims(plot_inputs, 1))
+        lowerbd = numpy.quantile(outputs_final, 0.05, axis=0)
+        upperbd = numpy.quantile(outputs_final, 0.95, axis=0)
+        inconint = np.logical_and(lowerbd < tot_targets, upperbd > tot_targets).ravel()
+        con_ind = np.zeros(len(lowerbd))
+        con_ind[inconint] = 1
+        con_ind = con_ind.reshape(len(con_ind), 1)
+        coverage_df = np.concatenate([coverage_df, con_ind], axis=1)
         # # Plot data and functions.
         # fig = plt.figure(figsize=(12, 8), facecolor='white')
         # ax = fig.add_subplot(111, frameon=False)
@@ -200,6 +201,6 @@ if __name__ == '__main__':
         # ax.legend()
         # plt.show()
     filename = "blockVar" + "B" + str(B) + "t"+str(t) + "noise"+str(tau) + ".csv"
-    np.savetxt(filename, coverage_df, delimiter=',', fmt='%d')
+    np.savbetxt(filename, coverage_df, delimiter=',', fmt='%d')
 
     # csv.reader("diagVar_QuantUQ.csv")

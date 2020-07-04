@@ -3,6 +3,7 @@ from __future__ import print_function
 import matplotlib.pyplot as plt
 import csv
 import sys
+import numpy
 import autograd.numpy as np
 import autograd.numpy.random as npr
 from black_box_svi import black_box_variational_inference
@@ -161,20 +162,20 @@ if __name__ == '__main__':
                                   step_size=0.1, num_iters=500, callback=callback)
         # print(variational_params)
         #
-        # # Sample functions from the final posterior.
+        # Sample functions from the final posterior.
+        rs = npr.RandomState(0)
+        mean, log_std = unpack_params(variational_params)
         # rs = npr.RandomState(0)
-        # mean, log_std = unpack_params(variational_params)
-        # # rs = npr.RandomState(0)
-        # sample_weights = rs.randn(1000, num_weights) * np.exp(log_std) + mean
-        # plot_inputs = np.linspace(-2, 2, num=400)
-        # outputs_final = predictions(sample_weights, np.expand_dims(plot_inputs, 1))
-        # lowerbd = np.quantile(outputs_final, 0.05, axis=0)
-        # upperbd = np.quantile(outputs_final, 0.95, axis=0)
-        # inconint = np.logical_and(lowerbd < tot_targets, upperbd > tot_targets).ravel()
-        # con_ind = np.zeros(len(lowerbd))
-        # con_ind[inconint] = 1
-        # con_ind = con_ind.reshape(len(con_ind), 1)
-        # coverage_df = np.concatenate([coverage_df, con_ind], axis=1)
+        sample_weights = rs.randn(1000, num_weights) * np.exp(log_std) + mean
+        plot_inputs = np.linspace(-2, 2, num=400)
+        outputs_final = predictions(sample_weights, np.expand_dims(plot_inputs, 1))
+        lowerbd = numpy.quantile(outputs_final, 0.05, axis=0)
+        upperbd = numpy.quantile(outputs_final, 0.95, axis=0)
+        inconint = np.logical_and(lowerbd < tot_targets, upperbd > tot_targets).ravel()
+        con_ind = np.zeros(len(lowerbd))
+        con_ind[inconint] = 1
+        con_ind = con_ind.reshape(len(con_ind), 1)
+        coverage_df = np.concatenate([coverage_df, con_ind], axis=1)
         # # Plot data and functions.
         # fig = plt.figure(figsize=(12, 8), facecolor='white')
         # ax = fig.add_subplot(111, frameon=False)
