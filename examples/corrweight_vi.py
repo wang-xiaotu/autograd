@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 from __future__ import print_function
-import matplotlib.pyplot as plt
-from scipy.linalg import block_diag
+#import matplotlib.pyplot as plt
+#from scipy.linalg import block_diag
 import autograd.numpy as np
-import autograd.scipy.linalg as spl
+#import autograd.scipy.linalg as spl
 import autograd.numpy.random as npr
 
 import autograd.scipy.stats.multivariate_normal as mvn

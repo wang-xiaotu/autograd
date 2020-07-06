@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
         print("Optimizing variational parameters...")
         variational_params = adam(gradient, init_var_params,
-                                  step_size=0.1, num_iters=10, callback=callback)
+                                  step_size=0.1, num_iters=500, callback=callback)
         # print(variational_params)
         #
         # Sample functions from the final posterior.

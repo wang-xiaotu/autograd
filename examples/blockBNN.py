@@ -201,6 +201,6 @@ if __name__ == '__main__':
         # ax.legend()
         # plt.show()
     filename = "blockVar" + "B" + str(B) + "t"+str(t) + "noise"+str(tau) + ".csv"
-    np.savbetxt(filename, coverage_df, delimiter=',', fmt='%d')
+    np.savetxt(filename, coverage_df, delimiter=',', fmt='%d')
 
     # csv.reader("diagVar_QuantUQ.csv")
