@@ -87,6 +87,7 @@ if __name__ == '__main__':
     for b in range(B):
         # Specify inference problem by its unnormalized log-posterior.
         rbf = lambda x: np.exp(-x ** 2)
+        print(b)
         num_weights, predictions, logprob = \
             make_nn_funs(layer_sizes=[1, 20, 20, 1], L2_reg=0.1,
                          noise_variance=0.01, nonlinearity=rbf)

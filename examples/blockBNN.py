@@ -101,6 +101,7 @@ if __name__ == '__main__':
     coverage_df[input_idx, :] = 1 # indicate the training data index
 
     for b in range(B):
+        print(b)
         # Specify inference problem by its unnormalized log-posterior.
         rbf = lambda x: np.exp(-x ** 2)
         num_weights, predictions, logprob, w_positions = \
