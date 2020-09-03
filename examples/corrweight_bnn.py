@@ -73,14 +73,14 @@ def build_toy_dataset(n_data=40, noise_std=0.1, type = "1", seed=0):
 
 
 if __name__ == '__main__':
-    input_args = sys.argv
-    print(sys.argv)
-    B = int(sys.argv[1])
-    t = sys.argv[2]
-    tau = float(sys.argv[3])
-    # B = 1
-    # t = "0"
-    # tau = 0.1
+    # input_args = sys.argv
+    # print(sys.argv)
+    # B = int(sys.argv[1])
+    # t = sys.argv[2]
+    # tau = float(sys.argv[3])
+    B = 1
+    t = "0"
+    tau = 0.3
     inputs, targets, tot_inputs, tot_targets, input_idx = build_toy_dataset(n_data=40, noise_std=tau, type = t)
     coverage_df = np.zeros(400).reshape(400, 1)
     coverage_df[input_idx, :] = 1 # indicate the training data index
@@ -88,7 +88,7 @@ if __name__ == '__main__':
         # Specify inference problem by its unnormalized log-posterior.
         rbf = lambda x: np.exp(-x ** 2)
         num_weights, predictions, logprob = \
-            make_nn_funs(layer_sizes=[1, 20, 20, 1], L2_reg=0.1,
+            make_nn_funs(layer_sizes=[1, 2, 2, 1], L2_reg=0.1,
                          noise_variance=0.01, nonlinearity=rbf)
 
         inputs, targets, tot_inputs, tot_targets, input_idx = build_toy_dataset(n_data=40, noise_std=tau, type = t)
