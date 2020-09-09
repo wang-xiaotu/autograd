@@ -99,14 +99,14 @@ def build_toy_dataset(n_data=40, noise_std=0.1, type = "1", seed=0):
     return inputs, targets, overallinput, overalltarget, input_ix
 
 if __name__ == '__main__':
-    input_args = sys.argv
-    print(sys.argv)
-    B = int(sys.argv[1])
-    t = sys.argv[2]
-    tau = float(sys.argv[3])
-    # B = 1
-    # t = "0"
-    # tau = 0.1
+    # input_args = sys.argv
+    # print(sys.argv)
+    # B = int(sys.argv[1])
+    # t = sys.argv[2]
+    # tau = float(sys.argv[3])
+    B = 1
+    t = "0"
+    tau = 0.1
     inputs, targets, tot_inputs, tot_targets, input_idx = build_toy_dataset(n_data=40, noise_std=tau, type = t)
     coverage_df = np.zeros(400).reshape(400, 1)
     coverage_df[input_idx, :] = 1 # indicate the training data index
@@ -115,7 +115,7 @@ if __name__ == '__main__':
         # Specify inference problem by its unnormalized log-posterior.
         rbf = lambda x: np.exp(-x ** 2)
         num_weights, predictions, logprob = \
-            make_nn_funs(layer_sizes=[1, 20, 20, 1], L2_reg=0.1,
+            make_nn_funs(layer_sizes=[1, 2, 2, 1], L2_reg=0.1,
                          noise_variance=0.01, nonlinearity=rbf)
 
         inputs, targets, tot_inputs, tot_targets, input_idx = build_toy_dataset(n_data=40, noise_std=tau, type = t)
@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
         print("Optimizing variational parameters...")
         variational_params = adam(gradient, init_var_params,
-                                  step_size=0.1, num_iters=100, callback=callback)
+                                  step_size=0.1, num_iters=200, callback=callback)
         # print(variational_params)
         #
         # Sample functions from the final posterior.
@@ -171,6 +171,7 @@ if __name__ == '__main__':
         mean, log_std = unpack_params(variational_params)
         # rs = npr.RandomState(0)
         sample_weights = rs.randn(1000, num_weights) * np.exp(log_std) + mean
+        np.savetxt("VIwts.csv", sample_weights, delimiter=',', fmt='%f')
         plot_inputs = np.linspace(-2, 2, num=400)
         outputs_final = predictions(sample_weights, np.expand_dims(plot_inputs, 1))
         lowerbd = numpy.quantile(outputs_final, 0.05, axis=0)
@@ -193,6 +194,6 @@ if __name__ == '__main__':
 
     filename = "diagVar" + "B" + str(B) + "t"+str(t) + "noise"+str(tau) + ".csv"
 
-    np.savetxt(filename, coverage_df, delimiter=',', fmt='%d')
+    # np.savetxt(filename, coverage_df, delimiter=',', fmt='%d')
 
     # csv.reader("diagVar_QuantUQ.csv")
